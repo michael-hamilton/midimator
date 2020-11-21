@@ -6,11 +6,12 @@ function createWindow () {
     width: 640,
     height: 480,
     webPreferences: {
-      contextIsolation: true
+      nodeIntegration: true,
     }
   });
 
   server(window);
+  window.openDevTools({mode: 'detach'});
   window.loadURL("http://localhost:1234");
 }
 

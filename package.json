@@ -7,7 +7,13 @@
   "author": "Michael Hamilton <michaelhamilton626@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development && parcel index.html & wait-on http://localhost:1234 && electron app.js"
+    "dev": "parcel index.html & wait-on http://localhost:1234 && electron ."
+  },
+  "build": {
+    "appId": "midimator",
+    "files": [
+      "dist/**/*"
+    ]
   },
   "devDependencies": {
     "electron": "^11.0.2",
@@ -16,6 +22,7 @@
     "wait-on": "^5.2.0"
   },
   "dependencies": {
+    "electron-rebuild": "^2.3.2",
     "midi": "^1.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"

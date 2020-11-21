@@ -2,9 +2,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  position: relative;
 }
 
 html, body, #root {
+  font-family: sans-serif;
   height: 100%;
   width: 100%;
 }
