@@ -11,23 +11,39 @@ class Midimator extends Component {
       note: 48,
       velocity: 127,
       program: 0,
+      devices: []
     }
   }
 
-  notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+  componentDidMount() {
+    ipcRenderer.on('devices', (event, devices) => {
+      this.setState({devices});
+    });
+    ipcRenderer.send('getMidiDevices');
+  }
+
+  componentWillUnmount() {
+    ipcRenderer.removeAllListeners();
+  }
 
   handlePlayNote(note, velocity) {
-    ipcRenderer.send('play', [144, note, velocity])
+    ipcRenderer.send('send', [144, note, velocity])
   }
 
   handlePC(program) {
     if (program >= 0) {
-      ipcRenderer.send('play', [192, program])
+      ipcRenderer.send('send', [192, program])
       this.setState({program})
     }
   }
 
-  ccToNote(cc) {
+  handleDeviceSelect(e) {
+    ipcRenderer.send('setMidiDevice', this.state.devices.indexOf(e.target.value))
+  }
+
+  notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+
+  ccToNote = (cc) => {
     let octave;
 
     if (cc >= 21 && cc < 24) {
@@ -131,6 +147,18 @@ class Midimator extends Component {
             onMouseOut={() => this.handlePlayNote(this.state.note, 0)}>
             &#9654;
           </button>
+        </div>
+
+        {/*Devices*/}
+        <div>
+          <select onChange={this.handleDeviceSelect.bind(this)} onClick={() => ipcRenderer.send('getMidiDevices')}>
+            <option disabled selected>Select device</option>
+            {
+              this.state.devices.map(device => (
+                <option>{device}</option>
+              ))
+            }
+          </select>
         </div>
 
       </div>
