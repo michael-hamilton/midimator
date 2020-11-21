@@ -1,0 +1,12 @@
+{
+  "name": "midimator",
+  "version": "0.1.0",
+  "description": "a midi automation utility",
+  "main": "index.js",
+  "repository": "https://github.com/michael-hamilton/midimator.git",
+  "author": "Michael Hamilton <michaelhamilton626@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
+  }
+}
