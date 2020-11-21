@@ -9,10 +9,12 @@ class Midimator extends Component {
 
     this.state = {
       note: 48,
+      inputNote: null,
       velocity: 127,
+      inputVelocity: null,
       program: 0,
       devices: [],
-      selectedDevice: null,
+      selectedDevice: -1,
     }
   }
 
@@ -20,7 +22,20 @@ class Midimator extends Component {
     ipcRenderer.on('devices', (event, devices) => {
       this.setState({devices});
     });
+
+    ipcRenderer.on('message', (event, message) => {
+      this.parseMessage(message);
+    });
+
+    ipcRenderer.on('selectedDevice', (event, device) => {
+      if (device !== false) {
+        const selectedDevice = parseInt(device);
+        this.setState({selectedDevice});
+      }
+    });
+
     ipcRenderer.send('getMidiDevices');
+    ipcRenderer.send('getSelectedMidiDevice');
   }
 
   componentWillUnmount() {
@@ -39,10 +54,21 @@ class Midimator extends Component {
     }
   }
 
-  handleDeviceSelect(e) {
-    const selectedDevice = parseInt(e.target.value);
+  handleDeviceSelect(device) {
+    const selectedDevice = parseInt(device);
     this.setState({selectedDevice})
     ipcRenderer.send('setMidiDevice', selectedDevice)
+  }
+
+  parseMessage(message) {
+    switch(message[0]) {
+      case 144:
+        this.setState({inputNote: message[1], inputVelocity: message[2]})
+        break;
+      case 192:
+        this.setState({program: message[1]})
+        break;
+    }
   }
 
   notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
@@ -80,95 +106,115 @@ class Midimator extends Component {
     else if (cc >= 120 && cc < 128) {
       octave = 9;
     }
-    else {
-      octave = '';
-    }
 
+    if(!octave) {
+      return '';
+    }
     return `${this.notes[((cc-21)%12)]}${octave}`
   }
 
   render() {
     return (
-      <div className={'container'}>
+      <div className={'app'}>
+        <div className={'container'}>
 
-        <div className={'param-controls-container'}>
-          {/*Program*/}
-          <div className={'param-control-wrapper'}>
-            <div className={'button-wrapper'}>
-              <button onClick={() => this.handlePC(this.state.program + 1)}>
-                &uarr;
-              </button>
-              <button onClick={() => this.handlePC(this.state.program - 1)}>
-                &darr;
-              </button>
+          {/*Input Status*/}
+          <div className={'input-status-container'}>
+            <div className={'input-status-item-wrapper'}>
+              <p className={'title'}>Last Input Note</p>
+              <p>
+                <b>{this.ccToNote(this.state.inputNote)}</b>
+              </p>
             </div>
 
-            <div className={'value-wrapper'}>
-              <p className={'title'}>PROGRAM</p>
-              <p className={'value'}>{this.state.program}</p>
-            </div>
-          </div>
-
-          {/*Velocity*/}
-          <div className={'param-control-wrapper'}>
-            <div className={'button-wrapper'}>
-              <button onClick={() => this.setState({velocity: this.state.velocity += 1})}>
-                &uarr;
-              </button>
-              <button onClick={() => this.setState({velocity: this.state.velocity -= 1})}>
-                &darr;
-              </button>
-            </div>
-
-            <div className={'value-wrapper'}>
-              <p className={'title'}>VELOCITY</p>
-              <p className={'value'}>{this.state.velocity}</p>
+            <div className={'input-status-item-wrapper'}>
+              <p className={'title'}>Input Velocity</p>
+              <p>
+                <b>{this.state.inputVelocity}</b>
+              </p>
             </div>
           </div>
 
-          {/*Note*/}
-          <div className={'param-control-wrapper'}>
-            <div className={'button-wrapper'}>
-              <button onClick={() => this.setState({note: this.state.note += 1})}>
-                &uarr;
-              </button>
-              <button onClick={() => this.setState({note: this.state.note -= 1})}>
-                &darr;
-              </button>
+          {/*Param controls*/}
+          <div className={'param-controls-container'}>
+            {/*Program*/}
+            <div className={'param-control-wrapper'}>
+              <div className={'button-wrapper'}>
+                <button onClick={() => this.handlePC(this.state.program + 1)}>
+                  &uarr;
+                </button>
+                <button onClick={() => this.handlePC(this.state.program - 1)}>
+                  &darr;
+                </button>
+              </div>
+
+              <div className={'value-wrapper'}>
+                <p className={'title'}>PROGRAM</p>
+                <p className={'value'}>{this.state.program}</p>
+              </div>
             </div>
 
-            <div className={'value-wrapper'}>
-              <p className={'title'}>NOTE</p>
-              <p className={'value'}>{this.ccToNote(this.state.note)}</p>
+            {/*Velocity*/}
+            <div className={'param-control-wrapper'}>
+              <div className={'button-wrapper'}>
+                <button onClick={() => this.setState({velocity: this.state.velocity += 1})}>
+                  &uarr;
+                </button>
+                <button onClick={() => this.setState({velocity: this.state.velocity -= 1})}>
+                  &darr;
+                </button>
+              </div>
+
+              <div className={'value-wrapper'}>
+                <p className={'title'}>VELOCITY</p>
+                <p className={'value'}>{this.state.velocity}</p>
+              </div>
             </div>
 
-            <div className={'play-button-wrapper'}>
-              <button
-                className={'play-button'}
-                onMouseDown={() => this.handlePlayNote(this.state.note, this.state.velocity)}
-                onMouseUp={() => this.handlePlayNote(this.state.note, 0)}
-                onMouseOut={() => this.handlePlayNote(this.state.note, 0)}>
-                &#9654;
-              </button>
+            {/*Note*/}
+            <div className={'param-control-wrapper'}>
+              <div className={'button-wrapper'}>
+                <button onClick={() => this.setState({note: this.state.note += 1})}>
+                  &uarr;
+                </button>
+                <button onClick={() => this.setState({note: this.state.note -= 1})}>
+                  &darr;
+                </button>
+              </div>
+
+              <div className={'value-wrapper'}>
+                <p className={'title'}>NOTE</p>
+                <p className={'value'}>{this.ccToNote(this.state.note)}</p>
+              </div>
+
+              <div className={'play-button-wrapper'}>
+                <button
+                  className={'play-button'}
+                  onMouseDown={() => this.handlePlayNote(this.state.note, this.state.velocity)}
+                  onMouseUp={() => this.handlePlayNote(this.state.note, 0)}
+                  onMouseOut={() => this.handlePlayNote(this.state.note, 0)}>
+                  &#9654;
+                </button>
+              </div>
             </div>
           </div>
+
+          {/*Devices*/}
+          <div className={'device-controls-container'}>
+            <select
+              value={this.state.selectedDevice}
+              onChange={(e) => this.handleDeviceSelect(e.target.value)}
+              onClick={() => ipcRenderer.send('getMidiDevices')}>
+              <option disabled value={-1}>Select a midi device</option>
+              {
+                this.state.devices.map((device, index) => (
+                  <option value={index} key={index}>{device}</option>
+                ))
+              }
+            </select>
+          </div>
+
         </div>
-
-        {/*Devices*/}
-        <div>
-          <select
-            defaultValue={-1}
-            onChange={this.handleDeviceSelect.bind(this)}
-            onClick={() => ipcRenderer.send('getMidiDevices')}>
-            <option disabled value={-1}>Select a midi device</option>
-            {
-              this.state.devices.map((device, index) => (
-                <option value={index}>{device}</option>
-              ))
-            }
-          </select>
-        </div>
-
       </div>
     );
   }
