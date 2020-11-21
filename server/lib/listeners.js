@@ -2,8 +2,9 @@ const { ipcMain } = require('electron');
 const midi = require('./midi');
 
 const Listeners = (window) => {
-  ipcMain.on( 'send', (event, arg) => midi.sendMessage(arg));
-  ipcMain.on( 'setMidiDevice', (event, arg) => midi.openPort(arg));
+  ipcMain.on( 'send', (event, message) => midi.sendMessage(message));
+  ipcMain.on( 'closePort', (event, port) => midi.closePort(port));
+  ipcMain.on( 'setMidiDevice', (event, port) => midi.openPort(port));
 
   ipcMain.on( 'getMidiDevices', (event, arg) => {
     const portCount = midi.getPortCount();

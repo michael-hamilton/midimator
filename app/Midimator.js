@@ -11,7 +11,8 @@ class Midimator extends Component {
       note: 48,
       velocity: 127,
       program: 0,
-      devices: []
+      devices: [],
+      selectedDevice: null,
     }
   }
 
@@ -23,6 +24,7 @@ class Midimator extends Component {
   }
 
   componentWillUnmount() {
+    ipcRenderer.send('closePort', this.state.selectedDevice);
     ipcRenderer.removeAllListeners();
   }
 
@@ -38,7 +40,9 @@ class Midimator extends Component {
   }
 
   handleDeviceSelect(e) {
-    ipcRenderer.send('setMidiDevice', this.state.devices.indexOf(e.target.value))
+    const selectedDevice = parseInt(e.target.value);
+    this.setState({selectedDevice})
+    ipcRenderer.send('setMidiDevice', selectedDevice)
   }
 
   notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
@@ -87,75 +91,79 @@ class Midimator extends Component {
     return (
       <div className={'container'}>
 
-        {/*Program*/}
-        <div className={'param-control-wrapper'}>
-          <div className={'button-wrapper'}>
-            <button onClick={() => this.handlePC(this.state.program + 1)}>
-              &uarr;
-            </button>
-            <button onClick={() => this.handlePC(this.state.program - 1)}>
-              &darr;
-            </button>
+        <div className={'param-controls-container'}>
+          {/*Program*/}
+          <div className={'param-control-wrapper'}>
+            <div className={'button-wrapper'}>
+              <button onClick={() => this.handlePC(this.state.program + 1)}>
+                &uarr;
+              </button>
+              <button onClick={() => this.handlePC(this.state.program - 1)}>
+                &darr;
+              </button>
+            </div>
+
+            <div className={'value-wrapper'}>
+              <p className={'title'}>PROGRAM</p>
+              <p className={'value'}>{this.state.program}</p>
+            </div>
           </div>
 
-          <div className={'value-wrapper'}>
-            <p className={'title'}>PROGRAM</p>
-            <p className={'value'}>{this.state.program}</p>
-          </div>
-        </div>
+          {/*Velocity*/}
+          <div className={'param-control-wrapper'}>
+            <div className={'button-wrapper'}>
+              <button onClick={() => this.setState({velocity: this.state.velocity += 1})}>
+                &uarr;
+              </button>
+              <button onClick={() => this.setState({velocity: this.state.velocity -= 1})}>
+                &darr;
+              </button>
+            </div>
 
-        {/*Velocity*/}
-        <div className={'param-control-wrapper'}>
-          <div className={'button-wrapper'}>
-            <button onClick={() => this.setState({velocity: this.state.velocity += 1})}>
-              &uarr;
-            </button>
-            <button onClick={() => this.setState({velocity: this.state.velocity -= 1})}>
-              &darr;
-            </button>
-          </div>
-
-          <div className={'value-wrapper'}>
-            <p className={'title'}>VELOCITY</p>
-            <p className={'value'}>{this.state.velocity}</p>
-          </div>
-        </div>
-
-        {/*Note*/}
-        <div className={'param-control-wrapper'}>
-          <div className={'button-wrapper'}>
-            <button onClick={() => this.setState({note: this.state.note += 1})}>
-              &uarr;
-            </button>
-            <button onClick={() => this.setState({note: this.state.note -= 1})}>
-              &darr;
-            </button>
+            <div className={'value-wrapper'}>
+              <p className={'title'}>VELOCITY</p>
+              <p className={'value'}>{this.state.velocity}</p>
+            </div>
           </div>
 
-          <div className={'value-wrapper'}>
-            <p className={'title'}>NOTE</p>
-            <p className={'value'}>{this.ccToNote(this.state.note)}</p>
-          </div>
-        </div>
+          {/*Note*/}
+          <div className={'param-control-wrapper'}>
+            <div className={'button-wrapper'}>
+              <button onClick={() => this.setState({note: this.state.note += 1})}>
+                &uarr;
+              </button>
+              <button onClick={() => this.setState({note: this.state.note -= 1})}>
+                &darr;
+              </button>
+            </div>
 
-        {/*Play*/}
-        <div>
-          <button
-            className={'play-button'}
-            onMouseDown={() => this.handlePlayNote(this.state.note, this.state.velocity)}
-            onMouseUp={() => this.handlePlayNote(this.state.note, 0)}
-            onMouseOut={() => this.handlePlayNote(this.state.note, 0)}>
-            &#9654;
-          </button>
+            <div className={'value-wrapper'}>
+              <p className={'title'}>NOTE</p>
+              <p className={'value'}>{this.ccToNote(this.state.note)}</p>
+            </div>
+
+            <div className={'play-button-wrapper'}>
+              <button
+                className={'play-button'}
+                onMouseDown={() => this.handlePlayNote(this.state.note, this.state.velocity)}
+                onMouseUp={() => this.handlePlayNote(this.state.note, 0)}
+                onMouseOut={() => this.handlePlayNote(this.state.note, 0)}>
+                &#9654;
+              </button>
+            </div>
+          </div>
         </div>
 
         {/*Devices*/}
         <div>
-          <select onChange={this.handleDeviceSelect.bind(this)} onClick={() => ipcRenderer.send('getMidiDevices')}>
-            <option disabled selected>Select device</option>
+          <select
+            defaultValue={-1}
+            onChange={this.handleDeviceSelect.bind(this)}
+            onClick={() => ipcRenderer.send('getMidiDevices')}>
+            <option disabled value={-1}>Select a midi device</option>
             {
-              this.state.devices.map(device => (
-                <option>{device}</option>
+              this.state.devices.map((device, index) => (
+                <option value={index}>{device}</option>
               ))
             }
           </select>
