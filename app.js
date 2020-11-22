@@ -4,7 +4,9 @@ const server = require('./server');
 function createWindow () {
   let window = new BrowserWindow({
     width: 750,
-    height: 250,
+    height: 150,
+    minHeight: 150,
+    minWidth: 750,
     webPreferences: {
       nodeIntegration: true,
     }

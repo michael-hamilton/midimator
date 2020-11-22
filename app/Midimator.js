@@ -122,16 +122,12 @@ class Midimator extends Component {
           <div className={'input-status-container'}>
             <div className={'input-status-item-wrapper'}>
               <p className={'title'}>Last Input Note</p>
-              <p>
-                <b>{this.ccToNote(this.state.inputNote)}</b>
-              </p>
+              <p>{this.ccToNote(this.state.inputNote)}</p>
             </div>
 
             <div className={'input-status-item-wrapper'}>
               <p className={'title'}>Input Velocity</p>
-              <p>
-                <b>{this.state.inputVelocity}</b>
-              </p>
+              <p>{this.state.inputVelocity}</p>
             </div>
           </div>
 
