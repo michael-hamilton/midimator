@@ -10,8 +10,8 @@
     "rebuild": "electron-rebuild",
     "dev": "parcel index.html & wait-on http://localhost:1234 && NODE_ENV=development electron .",
     "build": "parcel build index.html",
-    "package": "electron-builder --dir",
-    "dist": "electron-builder"
+    "package": "yarn build && electron-builder --dir",
+    "dist": "yarn build && electron-builder"
   },
   "build": {
     "appId": "midimator",

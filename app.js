@@ -13,10 +13,10 @@ function createWindow () {
   server(window);
   if (process.env.NODE_ENV === 'development') {
     window.openDevTools({mode: 'detach'});
-    window.loadURL(`file://${__dirname}/dist/index.html`);
+    window.loadURL('http://localhost:1234');
   }
   else {
-    window.loadFile('dist/index.html');
+    window.loadFile(`dist/index.html`);
   }
 }
 
