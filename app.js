@@ -11,8 +11,13 @@ function createWindow () {
   });
 
   server(window);
-  // window.openDevTools({mode: 'detach'});
-  window.loadURL("http://localhost:1234");
+  if (process.env.NODE_ENV === 'development') {
+    window.openDevTools({mode: 'detach'});
+    window.loadURL(`file://${__dirname}/dist/index.html`);
+  }
+  else {
+    window.loadFile('dist/index.html');
+  }
 }
 
 app.on('ready', createWindow);

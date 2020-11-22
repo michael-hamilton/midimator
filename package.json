@@ -8,23 +8,33 @@
   "license": "MIT",
   "scripts": {
     "rebuild": "electron-rebuild",
-    "dev": "parcel index.html & wait-on http://localhost:1234 && electron ."
+    "dev": "parcel index.html & wait-on http://localhost:1234 && NODE_ENV=development electron .",
+    "build": "parcel build index.html",
+    "package": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "build": {
     "appId": "midimator",
+    "directories": {
+      "output": "release"
+    },
     "files": [
+      "app.js",
+      "server/**/*",
       "dist/**/*"
     ]
   },
   "devDependencies": {
     "electron": "^11.0.2",
+    "electron-builder": "^22.9.1",
+    "electron-rebuild": "^2.3.2",
     "parcel-bundler": "^1.12.4",
     "sass": "^1.29.0",
     "wait-on": "^5.2.0"
   },
   "dependencies": {
-    "electron-rebuild": "^2.3.2",
     "midi": "^1.0.0",
+    "parcel-plugin-inliner": "^1.0.14",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   }
